@@ -1,0 +1,37 @@
+<script>
+    document.querySelectorAll('.assign-task-btn').forEach(button => {
+        button.addEventListener('click', async function () {
+            const taskId = this.getAttribute('data-task-id');
+
+            if (!taskId) {
+                alert('Task ID is missing!');
+                return;
+            }
+
+            const confirmed = confirm('Are you sure task completed?');
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/deleteTask/${taskId}`, {
+                    method: 'DELETE', // ใช้ method DELETE เพื่อทำการลบ
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    location.reload(); // รีเฟรชหน้าหลังจากลบ Task
+                } else {
+                    const errorText = await response.text();
+                    alert('Failed to delete task: ' + errorText);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error deleting task');
+            }
+        });
+    });
+
+</script>

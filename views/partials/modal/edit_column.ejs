@@ -1,0 +1,64 @@
+<!-- Modal for editing a column -->
+<div class="modal fade" id="editColumnModal" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Column</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editColumnId"> <!-- เก็บค่า columnId -->
+                <input type="text" class="form-control" id="editColumnName" placeholder="Column Name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEditColumnBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.edit-column-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const columnId = this.getAttribute('data-column-id');
+            const columnName = this.getAttribute('data-column-name');
+
+            document.getElementById('editColumnId').value = columnId;
+            document.getElementById('editColumnName').value = columnName;
+        });
+    });
+
+    document.getElementById('saveEditColumnBtn').addEventListener('click', async function (event) {
+        event.preventDefault();
+
+        const columnId = document.getElementById('editColumnId').value;
+        const columnName = document.getElementById('editColumnName').value.trim();
+
+        if (!columnName) {
+            alert('Column name is required!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/editColumn/${columnId}`, {
+                method: 'PUT', // ใช้ PUT แทน POST
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ columnName })
+            });
+
+            if (response.ok) {
+                location.reload(); // โหลดหน้าใหม่เพื่ออัปเดตข้อมูล
+            } else {
+                const errorText = await response.text();
+                alert('Failed to edit column: ' + errorText);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error editing column');
+        }
+    });
+
+</script>

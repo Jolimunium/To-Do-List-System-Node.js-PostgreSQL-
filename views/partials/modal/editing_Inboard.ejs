@@ -1,0 +1,84 @@
+<!-- Modal for Editing a in Board -->
+<div class="modal fade" id="editBoardModal" tabindex="-1" role="dialog" aria-labelledby="editBoardModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit In Board</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Hidden field for Board ID -->
+                <input type="hidden" id="editBoardId">
+
+                <div class="mb-3">
+                    <label for="editBoardName" class="form-label">Board Name</label>
+                    <input type="text" class="form-control" id="editBoardName" placeholder="Board Name">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="editBoardDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="editBoardDescription" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEditBoardBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.edit-board-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const boardId = this.getAttribute('data-board-id');
+            const boardName = this.getAttribute('data-board-name');
+            const boardDescription = this.getAttribute('data-board-description');
+
+            // ตั้งค่าข้อมูลใน Modal
+            document.getElementById('editBoardId').value = boardId;
+            document.getElementById('editBoardName').value = boardName;
+            document.getElementById('editBoardDescription').value = boardDescription;
+
+            // เปิด Modal
+        });
+    });
+
+    document.getElementById('saveEditBoardBtn').addEventListener('click', async function (event) {
+        event.preventDefault();
+
+        const boardId = document.getElementById('editBoardId').value;
+        const newBoardName = document.getElementById('editBoardName').value.trim();
+        const newDescription = document.getElementById('editBoardDescription').value.trim();
+
+        if (!newBoardName) {
+            alert('Board name is required!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/updateInBoard/${boardId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newboardsName: newBoardName, newDescription: newDescription })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(result.message);
+                location.reload(); // รีเฟรชหน้าเมื่อแก้ไขสำเร็จ
+            } else {
+                alert(result.message || 'Failed to update board');
+            }
+        } catch (error) {
+            console.error('Error editing In board:', error);
+            alert('Error editing In board');
+        }
+    });
+
+</script>

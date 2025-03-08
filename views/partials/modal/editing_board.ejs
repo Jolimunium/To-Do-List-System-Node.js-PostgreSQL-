@@ -1,0 +1,130 @@
+<!-- Modal for Editing a Board -->
+<div class="modal fade" id="editBoardModal" tabindex="-1" role="dialog" aria-labelledby="editBoardModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Board</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editBoardId"> <!-- Hidden Field to Store Board ID -->
+
+                <div class="mb-3">
+                    <label for="editBoardName" class="form-label">Board Name</label>
+                    <input type="text" class="form-control" id="editBoardName" placeholder="Board Name">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEditBoardBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Deleting a Board -->
+<div class="modal fade" id="deleteBoardModal" tabindex="-1" role="dialog" aria-labelledby="deleteBoardModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Board</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <text>Are you sure you want to delete "<strong class="fs-5" id="deleteBoardName"></strong>" board?</text>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBoardBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set data for Edit Modal
+    document.querySelectorAll('.edit-board-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const boardId = this.getAttribute('data-board-id');
+            const boardName = this.getAttribute('data-board-name');
+
+            document.getElementById('editBoardId').value = boardId;
+            document.getElementById('editBoardName').value = boardName;
+        });
+    });
+
+    // Save changes in Edit Modal
+    document.getElementById('saveEditBoardBtn').addEventListener('click', async function (event) {
+        event.preventDefault();
+
+        const boardId = document.getElementById('editBoardId').value;
+        const newBoardName = document.getElementById('editBoardName').value.trim();
+
+        if (!newBoardName) {
+            alert('Board name is required!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/updateBoard/${boardId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ newboardsName: newBoardName })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.message || 'Failed to update board');
+            }
+        } catch (error) {
+            console.error('Error editing board:', error);
+            alert('Error editing board');
+        }
+    });
+
+    // Set data for Delete Modal
+    document.querySelectorAll('.delete-board-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const boardId = this.getAttribute('data-board-id');
+            const boardName = this.getAttribute('data-board-name');
+
+            document.getElementById('confirmDeleteBoardBtn').setAttribute('data-board-id', boardId);
+            document.getElementById('deleteBoardName').textContent = boardName;
+        });
+    });
+
+    // Confirm Delete in Delete Modal
+    document.getElementById('confirmDeleteBoardBtn').addEventListener('click', async function () {
+        event.preventDefault();
+
+        const boardId = this.getAttribute('data-board-id');
+        const BoardName = document.getElementById('editBoardName').value.trim();
+
+        try {
+            const response = await fetch(`/deleteBoard/${boardId}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.message || 'Failed to delete board');
+            }
+        } catch (error) {
+            console.error('Error deleting board:', error);
+            alert('Error deleting board');
+        }
+    });
+</script>

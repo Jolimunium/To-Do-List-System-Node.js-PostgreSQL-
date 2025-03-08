@@ -1,0 +1,74 @@
+<!-- Modal for Editing a Task -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTaskId"> <!-- ซ่อน Task ID -->
+                <input type="text" class="form-control" id="editTaskName" placeholder="Task Name">
+                <textarea class="form-control mt-3" id="editTaskDescription" placeholder="Task Description"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveEditTaskBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ดึงค่าของ Task ที่จะถูกแก้ไขเมื่อกดปุ่ม "Edit Task"
+    document.querySelectorAll('.edit-task-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const taskId = this.getAttribute('data-task-id');
+            const taskName = this.getAttribute('data-task-name');
+            const taskDescription = this.getAttribute('data-task-description');
+
+            document.getElementById('editTaskId').value = taskId;
+            document.getElementById('editTaskName').value = taskName;
+            document.getElementById('editTaskDescription').value = taskDescription;
+        });
+    });
+
+    // เมื่อกดปุ่ม Save Changes (บันทึกการแก้ไข Task)
+    document.getElementById('saveEditTaskBtn').addEventListener('click', async function (event) {
+        event.preventDefault(); // ป้องกันการโหลดหน้าใหม่
+
+        const taskId = document.getElementById('editTaskId').value;
+        const taskName = document.getElementById('editTaskName').value.trim();
+        const taskDescription = document.getElementById('editTaskDescription').value.trim();
+
+        if (!taskName) {
+            alert('Task name is required!');
+            return;
+        }
+        if (!taskDescription) {
+            alert('Task description is required!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/editTask/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ taskName, taskDescription })
+            });
+
+            if (response.ok) {
+                location.reload(); // โหลดหน้าใหม่เพื่อแสดงข้อมูลที่อัปเดต
+            } else {
+                const errorText = await response.text();
+                alert('Failed to update task: ' + errorText);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error updating task');
+        }
+    });
+</script>
+

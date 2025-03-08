@@ -1,0 +1,52 @@
+<!-- Modal for adding a column -->
+<div class="modal fade" id="addColumnModal" tabindex="-1" role="dialog" aria-labelledby="addColumnModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addColumnModalLabel">Add New Column</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="columnName" name="columnName" placeholder="Column Name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveColumnBtn">Save Column</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('saveColumnBtn').addEventListener('click', async function (event) {
+        event.preventDefault(); // ป้องกันการโหลดหน้าใหม่
+
+        const columnName = document.getElementById('columnName').value.trim();
+        const columnId = "<%= takeBoard.id %>"; // ดึงค่า board ID จาก EJS
+
+        if (!columnName) {
+            alert('Column name is required!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/addColumn/${columnId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ columnName })
+            });
+
+            if (response.ok) {
+                location.reload(); // โหลดหน้าใหม่เพื่อแสดงข้อมูลที่เพิ่ม
+            } else {
+                const errorText = await response.text();
+                alert('Failed to add column: ' + errorText);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error adding column');
+        }
+    });
+</script>
